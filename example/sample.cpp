@@ -13,6 +13,7 @@ class StopMotion {};
 using namespace std::chrono_literals;
 
 void sender_work(messaging::Receiver& receiver) {
+  // "Connect" sender and receiver by sharing the same queue
   messaging::Sender sender(receiver);
 
   // Change this value to see if the synchronization works.
