@@ -2,8 +2,6 @@
 #include <queue.hpp>
 namespace messaging {
 class Sender {
-  Queue* q_;
-
  public:
   explicit Sender(Queue* q) : q_(q) {}
 
@@ -14,5 +12,8 @@ class Sender {
     }
     q_->push(std::forward<T>(msg));
   }
+
+ private:
+  Queue* q_;
 };
 }  // namespace messaging

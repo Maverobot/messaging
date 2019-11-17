@@ -7,9 +7,27 @@ namespace messaging {
 class CloseQueue {};
 
 class Dispatcher {
-  Queue* q_;
-  bool chained_;
+ public:
+  Dispatcher(Dispatcher&& other) : q_(other.q_), chained_(other.chained_) {
+    // why chained needs to be set to true
+    other.chained_ = true;
+  }
 
+  explicit Dispatcher(Queue* q) : q_(q), chained_(false) {}
+
+  // It might throw
+  ~Dispatcher() noexcept(false) {
+    if (!chained_) {
+      wait_and_dispatch();
+    }
+  }
+
+  template <typename Msg, typename Func>
+  auto handle(Func&& f) {
+    return TemplateDispatcher<messaging::Dispatcher, Msg, Func>(q_, this, std::forward<Func>(f));
+  }
+
+ private:
   // Delete copy constructor and operator
   Dispatcher(Dispatcher const&) = delete;
   Dispatcher& operator=(Dispatcher const&) = delete;
@@ -34,24 +52,7 @@ class Dispatcher {
     return false;
   }
 
- public:
-  Dispatcher(Dispatcher&& other) : q_(other.q_), chained_(other.chained_) {
-    // why chained needs to be set to true
-    other.chained_ = true;
-  }
-
-  explicit Dispatcher(Queue* q) : q_(q), chained_(false) {}
-
-  // It might throw
-  ~Dispatcher() noexcept(false) {
-    if (!chained_) {
-      wait_and_dispatch();
-    }
-  }
-
-  template <typename Msg, typename Func>
-  auto handle(Func&& f) {
-    return TemplateDispatcher<messaging::Dispatcher, Msg, Func>(q_, this, std::forward<Func>(f));
-  }
+  Queue* q_;
+  bool chained_;
 };
 }  // namespace messaging

@@ -16,10 +16,6 @@ struct WrappedMessage : MessageBase {
 };
 
 class Queue {
-  std::mutex m_;
-  std::condition_variable c_;
-  std::queue<std::shared_ptr<MessageBase>> q_;
-
  public:
   template <typename T>
   void push(T const& msg) {
@@ -35,5 +31,10 @@ class Queue {
     q_.pop();
     return res;
   }
+
+ private:
+  std::mutex m_;
+  std::condition_variable c_;
+  std::queue<std::shared_ptr<MessageBase>> q_;
 };
 }  // namespace messaging

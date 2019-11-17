@@ -7,12 +7,13 @@
 namespace messaging {
 
 class Receiver {
-  Queue q_;
-
  public:
   // Allow implicit conversion to a sender that references the queue
   operator Sender() { return Sender(&q_); }
 
   Dispatcher wait() { return Dispatcher(&q_); }
+
+ private:
+  Queue q_;
 };
 }  // namespace messaging
