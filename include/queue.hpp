@@ -24,7 +24,7 @@ class Queue {
   template <typename T>
   void push(T const& msg) {
     std::lock_guard<std::mutex> lk(m_);
-    q_.push(std::make_shared<WrappedMessage>(msg));
+    q_.push(std::make_shared<WrappedMessage<T>>(msg));
     c_.notify_all();
   }
 

@@ -27,11 +27,10 @@ class TemplateDispatcher {
 
   bool dispatch(std::shared_ptr<MessageBase> const& msg) {
     if (WrappedMessage<Msg>* wrapper = dynamic_cast<WrappedMessage<Msg>*>(msg.get())) {
-      if (wrapper->content) {
-        return true;
-      } else {
-        return prev_->dispatch(msg);
-      }
+      f_(wrapper->content);
+      return true;
+    } else {
+      return prev_->dispatch(msg);
     }
   }
 
