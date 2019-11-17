@@ -1,6 +1,5 @@
 #include <chrono>
 #include <iostream>
-#include <queue.hpp>
 #include <receiver.hpp>
 #include <sender.hpp>
 #include <thread>
