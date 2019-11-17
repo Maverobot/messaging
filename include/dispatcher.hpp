@@ -6,6 +6,7 @@
 namespace messaging {
 class CloseQueue {};
 
+// This is the root/parent dispatcher
 class Dispatcher {
  public:
   Dispatcher(Dispatcher&& other) : q_(other.q_), chained_(other.chained_) {
@@ -18,6 +19,8 @@ class Dispatcher {
   // It might throw
   ~Dispatcher() noexcept(false) {
     if (!chained_) {
+      // If this dispatcher has no chained dispatchers, it means it does not have any handling
+      // functions. What it can do in the destructor is to wait for CloseQueue event to come.
       wait_and_dispatch();
     }
   }
@@ -36,9 +39,10 @@ class Dispatcher {
   template <typename Dispatcher, typename Msg, typename Func>
   friend class TemplateDispatcher;
 
-  // Infinite loop to dispatch messages
+  // Infinite loop until CloseQueue event occurs
   void wait_and_dispatch() {
     for (;;) {
+      std::cout << "infinite\n";
       auto msg = q_->waitAndPop();
       dispatch(msg);
     }
@@ -49,6 +53,7 @@ class Dispatcher {
     if (dynamic_cast<WrappedMessage<CloseQueue>*>(msg.get())) {
       throw CloseQueue();
     }
+    std::cout << "No chained message handlers match this message\n";
     return false;
   }
 

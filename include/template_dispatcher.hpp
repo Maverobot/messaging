@@ -3,6 +3,8 @@
 #include <queue.hpp>
 
 namespace messaging {
+
+// The dispatcher comparing to messaging::Dispatcher
 template <typename PreviousDispatcher, typename Msg, typename Func>
 class TemplateDispatcher {
  public:
@@ -16,16 +18,29 @@ class TemplateDispatcher {
     prev_->chained_ = true;
   }
 
+  // Dispatching happens in destructor
   ~TemplateDispatcher() noexcept(false) {
     if (!chained_) {
       waitAndDispatch();
     }
   }
 
-  template <typename OtherMsg, typename OtherFunc>
-  auto handle(OtherFunc&& f) {
-    return TemplateDispatcher<TemplateDispatcher, OtherMsg, OtherFunc>(q_, this,
-                                                                       std::forward<OtherFunc>(f));
+  /**
+   * Example:
+   * messaging::Receiver = rec;
+   * rec.wait().handle<MessageTypeA>(func_on_message_type_A)
+   *           .handle<MessageTypeB>(func_on_message_type_B)
+   *           .handle<MessageTypeC>(func_on_message_type_C);
+   *
+   * When a message pops up, it will first be tried to match MessageTypeC, then MessageTypeB, then
+   * MessageTypeC. If any of them matches, the corresponding function will be called and proceeds.
+   * Otherwise, it will keep waiting.
+   *
+   */
+  template <typename NextMsg, typename NextFunc>
+  auto handle(NextFunc&& f) {
+    return TemplateDispatcher<TemplateDispatcher, NextMsg, NextFunc>(q_, this,
+                                                                     std::forward<NextFunc>(f));
   }
 
  private:
@@ -39,6 +54,7 @@ class TemplateDispatcher {
     for (;;) {
       auto msg = q_->waitAndPop();
       if (dispatch(msg)) {
+        // After dispatching the first WrappedMessage<Msg>
         break;
       }
     }
@@ -48,9 +64,10 @@ class TemplateDispatcher {
     if (WrappedMessage<Msg>* wrapper = dynamic_cast<WrappedMessage<Msg>*>(msg.get())) {
       f_(wrapper->content);
       return true;
-    } else {
-      return prev_->dispatch(msg);
     }
+    // If the current TemplateDispatcher does not deal with this msg type, try with the previous
+    // TemplateDispatcher
+    return prev_->dispatch(msg);
   }
 
   Queue* q_;
