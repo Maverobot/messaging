@@ -19,26 +19,26 @@ void sender_work(messaging::Receiver& receiver) {
   // Change this value to see if the synchronization works.
   auto sleep_inverval = 10us;
 
-  std::cout << "sending idle\n";
+  std::cout << "Sending idle\n";
   sender.send(Idle());
   std::this_thread::sleep_for(sleep_inverval);
-  std::cout << "sending moveslow\n";
+  std::cout << "Sending moveslow\n";
   sender.send(MoveSlow());
   std::this_thread::sleep_for(sleep_inverval);
-  std::cout << "sending movefast\n";
+  std::cout << "Sending movefast\n";
   sender.send(MoveFast());
   std::this_thread::sleep_for(sleep_inverval);
-  std::cout << "sending stopmotion\n";
+  std::cout << "Sending stopmotion\n";
   sender.send(StopMotion());
   std::this_thread::sleep_for(sleep_inverval);
 }
 
 void receiver_work(messaging::Receiver& receiver) {
   // Receiver
-  receiver.wait().handle<Idle>([](auto const& i) { std::cout << "Idle\n"; });
-  receiver.wait().handle<MoveSlow>([](auto const& i) { std::cout << "MoveSlow\n"; });
-  receiver.wait().handle<MoveFast>([](auto const& i) { std::cout << "MoveFast\n"; });
-  receiver.wait().handle<StopMotion>([](auto const& i) { std::cout << "StopMotion\n"; });
+  receiver.wait().handle<Idle>([](auto const& i) { std::cout << "Received Idle\n\n"; });
+  receiver.wait().handle<MoveSlow>([](auto const& i) { std::cout << "Received MoveSlow\n\n"; });
+  receiver.wait().handle<MoveFast>([](auto const& i) { std::cout << "Received MoveFast\n\n"; });
+  receiver.wait().handle<StopMotion>([](auto const& i) { std::cout << "Received StopMotion\n\n"; });
 }
 
 int main(int argc, char* argv[]) {
